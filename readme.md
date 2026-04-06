@@ -1,4 +1,3 @@
 # Shopping List
 
-Simple shopping list app using J
-JavaScript.
+Simple shopping list app using JavaScript.
