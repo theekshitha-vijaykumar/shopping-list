@@ -65,10 +65,24 @@ const clearItems = () => {
   resetUI();
 };
 
+function filterItems(e) {
+  const items = itemList.querySelectorAll("li");
+  const searchText = e.target.value.toLowerCase();
+
+  items.forEach((item) => {
+    const itemName = item.textContent.toLowerCase();
+
+    if (itemName.includes(searchText)) {
+      item.style.display = "flex";
+    } else {
+      item.style.display = "none";
+    }
+  });
+}
+
 function resetUI() {
   const items = itemList.querySelectorAll("li");
 
-  console.log(items);
   if (items.length === 0) {
     clearBtn.style.display = "none";
     itemFilter.style.display = "none";
@@ -81,5 +95,6 @@ function resetUI() {
 itemForm.addEventListener("submit", addItem);
 itemList.addEventListener("click", removeItem);
 clearBtn.addEventListener("click", clearItems);
+itemFilter.addEventListener("input", filterItems);
 
 resetUI();
