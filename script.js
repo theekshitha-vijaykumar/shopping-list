@@ -4,7 +4,15 @@ const itemList = document.getElementById("item-list");
 const clearBtn = document.querySelector(".btn-clear");
 const itemFilter = document.getElementById("filter");
 
-const addItem = (e) => {
+function displayItems() {
+  const itemsStored = getItemsFromStorage();
+
+  itemsStored.forEach((item) => addItemToDOM(item));
+
+  resetUI();
+}
+
+const onAddItemSubmit = (e) => {
   e.preventDefault();
 
   const newItem = itemInput.value;
@@ -14,6 +22,15 @@ const addItem = (e) => {
     return;
   }
 
+  addItemToDOM(newItem);
+  addItemToStorage(newItem);
+
+  resetUI();
+
+  itemInput.value = "";
+};
+
+function addItemToDOM(newItem) {
   const li = document.createElement("li");
   li.appendChild(document.createTextNode(newItem));
 
@@ -22,11 +39,7 @@ const addItem = (e) => {
   li.appendChild(button);
 
   itemList.appendChild(li);
-
-  resetUI();
-
-  itemInput.value = "";
-};
+}
 
 function createButton(classes) {
   const button = document.createElement("button");
@@ -40,27 +53,48 @@ function createButton(classes) {
   return button;
 }
 
-// const removeItem = (e) => {
-//   if (e.target.parentElement.classList.contains("remove-item")) {
-//     e.target.parentElement.parentElement.remove();
-//   }
-// };
+function addItemToStorage(item) {
+  const itemsStored = getItemsFromStorage();
+  itemsStored.push(item);
 
-const removeItem = (e) => {
-  const button = e.target.closest(".remove-item");
-  if (!button) return;
+  localStorage.setItem("items", JSON.stringify(itemsStored));
+}
 
+function getItemsFromStorage() {
+  const itemsStored = JSON.parse(localStorage.getItem("items")) ?? [];
+  return itemsStored;
+}
+
+function onClickItem(e) {
+  if (e.target.parentElement.classList.contains("remove-item")) {
+    removeItem(e.target.parentElement.parentElement);
+  }
+}
+
+function removeItem(item) {
   if (confirm("Are you sure?")) {
-    button.closest("li").remove();
+    item.remove();
+
+    removeItemFromStorage(item.textContent);
 
     resetUI();
   }
-};
+}
+
+function removeItemFromStorage(item) {
+  let itemsStored = getItemsFromStorage();
+
+  itemsStored = itemsStored.filter((i) => i !== item);
+
+  localStorage.setItem("items", JSON.stringify(itemsStored));
+}
 
 const clearItems = () => {
   while (itemList.firstChild) {
     itemList.removeChild(itemList.firstChild);
   }
+
+  localStorage.removeItem("items");
 
   resetUI();
 };
@@ -92,9 +126,13 @@ function resetUI() {
   }
 }
 
-itemForm.addEventListener("submit", addItem);
-itemList.addEventListener("click", removeItem);
-clearBtn.addEventListener("click", clearItems);
-itemFilter.addEventListener("input", filterItems);
+function init() {
+  itemForm.addEventListener("submit", onAddItemSubmit);
+  itemList.addEventListener("click", onClickItem);
+  clearBtn.addEventListener("click", clearItems);
+  itemFilter.addEventListener("input", filterItems);
+  document.addEventListener("DOMContentLoaded", displayItems);
+  resetUI();
+}
 
-resetUI();
+init();
